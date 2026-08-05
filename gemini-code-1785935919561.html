@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ms Lê Hằng English - Interactive Practice Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+  :root {
+    --primary-pink: #FF80BF;
+    --primary-pink-dark: #FF52A3;
+    --pastel-bg: #FFF0F6;
+    --pastel-card: #FFFFFF;
+    --pastel-purple: #D8B4FE;
+    --pastel-green: #00D26A;
+    --pastel-red: #FF4757;
+    --pastel-yellow: #FDCB6E;
+    --text-color: #2D3436;
+    --border-radius: 18px;
+    --box-shadow-3d: 0 6px 0px rgba(0,0,0,0.12);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  body {
+    background: linear-gradient(-45deg, #FFB6C1, #FFC0CB, #E6E6FA, #FFF0F5, #FFD1DC);
+    background-size: 400% 400%;
+    animation: gradientShift 12s ease infinite;
+    color: var(--text-color);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 100 100'><text x='10' y='30' font-size='22'>🍓</text><text x='60' y='30' font-size='20'>⭐</text><text x='30' y='80' font-size='22'>🌸</text><text x='75' y='80' font-size='20'>🐱</text></svg>");
+    opacity: 0.25;
+    pointer-events: none;
+    animation: floatingPattern 20s linear infinite;
+    z-index: 0;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes floatingPattern {
+    from { background-position: 0 0; }
+    to { background-position: 120px 240px; }
+  }
+
+  header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 4px solid #FFD1DC;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    z-index: 100;
+  }
+
+  .header-title h1 {
+    font-size: 1.2rem;
+    color: var(--primary-pink-dark);
+    font-weight: 900;
+  }
+
+  .passage-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    background: #FFF0F6;
+    border: 2px solid var(--primary-pink);
+    color: var(--primary-pink-dark);
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 0 var(--primary-pink);
+  }
+
+  .tab-btn:hover {
+    background: var(--primary-pink);
+    color: white;
+  }
+
+  .tab-btn.active {
+    background: var(--primary-pink-dark);
+    color: white;
+    border-color: var(--primary-pink-dark);
+    box-shadow: 0 2px 0 #D63384;
+  }
+
+  .timer-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #FFF;
+    padding: 6px 16px;
+    border-radius: 50px;
+    border: 3px solid var(--primary-pink);
+    box-shadow: var(--box-shadow-3d);
+  }
+
+  .timer-display {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--primary-pink-dark);
+    min-width: 65px;
+    text-align: center;
+  }
+
+  .btn-timer {
+    background: var(--primary-pink);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 3px 0 var(--primary-pink-dark);
+  }
+
+  .btn-timer:hover { transform: translateY(-2px); }
+
+  .progress-container {
+    width: 15%;
+    background: #E9ECEF;
+    height: 16px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #DEE2E6;
+  }
+
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #FF80BF, #00D26A);
+    transition: width 0.4s ease;
+    border-radius: 10px;
+  }
+
+  .main-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    padding: 15px;
+    gap: 15px;
+    z-index: 1;
+  }
+
+  .pane {
+    flex: 1;
+    width: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    overflow-y: auto;
+    border: 3px solid #FFF;
+    box-shadow: 0 8px 24px rgba(149, 157, 165, 0.15);
+  }
+
+  .passage-content, .exercise-content {
+    display: none;
+  }
+
+  .passage-content.active, .exercise-content.active {
+    display: block;
+  }
+
+  .passage-title {
+    color: var(--primary-pink-dark);
+    font-size: 1.15rem;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: 900;
+    border-bottom: 2px dashed var(--primary-pink);
+    padding-bottom: 8px;
+  }
+
+  .paragraph-box {
+    background: #FFF;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    border: 2px solid #FFE4E1;
+    line-height: 1.7;
+    font-size: 0.96rem;
+  }
+
+  .btn-translate {
+    background: #FFF3BF;
+    color: #D9480F;
+    border: 2px solid #FCC419;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 8px;
+    display: inline-block;
+  }
+
+  .translation-text {
+    display: none;
+    margin-top: 10px;
+    padding: 10px;
+    background: #FFF9DB;
+    border-left: 4px solid #FCC419;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #495057;
+  }
+
+  .notice-display {
+    background: #FFF9DB;
+    border: 3px solid #FCC419;
+    border-radius: 12px;
+    padding: 14px;
+    margin: 10px 0;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+
+  .sign-icon-container {
+    width: 90px;
+    height: 90px;
+    margin: 10px auto;
+    border: 5px solid #D63031;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background: #FFF;
+  }
+
+  .sign-icon-container::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 5px;
+    background: #D63031;
+    transform: rotate(-45deg);
+  }
+
+  .glossary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  .glossary-table th, .glossary-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #F1F3F5;
+    font-size: 0.85rem;
+  }
+
+  .glossary-table th {
+    background: var(--primary-pink);
+    color: white;
+    font-weight: 800;
+  }
+
+  .question-card {
+    background: #FFF;
+    border-radius: 15px;
+    padding: 16px;
+    margin-bottom: 20px;
+    border: 3px solid #F1F3F5;
+    box-shadow: var(--box-shadow-3d);
+  }
+
+  .question-text {
+    font-weight: 800;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+    color: #2D3436;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .option-btn {
+    background: #F8F9FA;
+    border: 2px solid #E9ECEF;
+    padding: 10px 14px;
+    border-radius: 12px;
+    text-align: left;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 3px 0 #DEE2E6;
+    font-size: 0.92rem;
+  }
+
+  .option-btn:hover {
+    background: #FFF0F6;
+    border-color: var(--primary-pink);
+  }
+
+  .option-btn.correct {
+    background: var(--pastel-green) !important;
+    color: white !important;
+    border-color: #00B050 !important;
+    box-shadow: 0 3px 0 #00B050 !important;
+  }
+
+  .option-btn.wrong {
+    background: var(--pastel-red) !important;
+    color: white !important;
+    border-color: #D63031 !important;
+    box-shadow: 0 3px 0 #D63031 !important;
+    animation: shake 0.4s;
+  }
+
+  .explanation-box {
+    display: none;
+    margin-top: 12px;
+    padding: 14px;
+    background: #F0FDF4;
+    border: 2px solid #86EFAC;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .exp-step {
+    margin-bottom: 8px;
+  }
+
+  .exp-step:last-child {
+    margin-bottom: 0;
+  }
+
+  .exp-step strong {
+    color: #15803D;
+    font-weight: 800;
+  }
+
+  .submit-container { text-align: center; margin: 20px 0; }
+
+  .btn-submit {
+    background: linear-gradient(135deg, #00D26A, #00B050);
+    color: white;
+    border: none;
+    padding: 12px 35px;
+    font-size: 1.1rem;
+    font-weight: 900;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #008037;
+    transition: all 0.2s;
+  }
+
+  .btn-submit:hover { transform: translateY(-2px); }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-card {
+    background: white;
+    padding: 25px;
+    border-radius: 25px;
+    text-align: center;
+    max-width: 480px;
+    width: 90%;
+    border: 5px solid var(--primary-pink);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="header-title">
+      <h1>Ms Lê Hằng English</h1>
+    </div>
+    <div class="passage-tabs">
+      <button class="tab-btn active" onclick="switchPassage(1)">Ex 8: Signs 🛑</button>
+      <button class="tab-btn" onclick="switchPassage(2)">Ex 8: Tet Traditions 🧧</button>
+      <button class="tab-btn" onclick="switchPassage(3)">Ex 9: Oak City 🏙️</button>
+      <button class="tab-btn" onclick="switchPassage(4)">Ex 10: Sa Pa Trip 🏔️</button>
+    </div>
+  </div>
+
+  <div class="timer-container">
+    <span class="timer-display" id="timerDisplay">25:00</span>
+    <button class="btn-timer" id="timerToggleBtn" onclick="toggleTimer()">BẮT ĐẦU</button>
+  </div>
+
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+</header>
+
+<div class="main-container">
+  <!-- LEFT PANE: CONTENT & GLOSSARY -->
+  <div class="pane" id="leftPane">
+    
+    <!-- PASSAGE 1: EXERCISE 8 - SIGNS & NOTICES -->
+    <div class="passage-content active" id="passage1">
+      <h2 class="passage-title">EXERCISE 8: READ SIGNS AND NOTICES</h2>
+      
+      <div class="paragraph-box">
+        <h3 style="color: var(--primary-pink-dark); margin-bottom: 6px;">Sign 1: No Food or Drink</h3>
+        <div class="sign-icon-container">
+          <span style="font-size: 2rem;">🍔</span>
+        </div>
+        <p style="text-align: center; font-weight: 700; color: #D63031;">NO FOOD OR DRINK ALLOWED</p>
+      </div>
+
+      <div class="paragraph-box">
+        <h3 style="color: var(--primary-pink-dark); margin-bottom: 6px;">Notice 2: Exit Sign</h3>
+        <div class="notice-display" style="background: #E6FFFA; border: 3px solid #38B2AC;">
+          <strong style="font-size: 1.5rem; color: #234E52; letter-spacing: 2px;">Exit 🏃</strong>
+        </div>
+      </div>
+
+      <div class="paragraph-box">
+        <h3 style="color: var(--primary-pink-dark); margin-bottom: 6px;">Sign 3: No Left Turn</h3>
+        <div class="sign-icon-container">
+          <span style="font-size: 2rem;">↰</span>
+        </div>
+        <p style="text-align: center; font-weight: 700; color: #D63031;">NO LEFT TURN</p>
+      </div>
+
+      <div class="paragraph-box">
+        <h3 style="color: var(--primary-pink-dark); margin-bottom: 6px;">Sign 4: No Bicycles</h3>
+        <div class="sign-icon-container">
+          <span style="font-size: 2rem;">🚲</span>
+        </div>
+        <p style="text-align: center; font-weight: 700; color: #D63031;">NO BICYCLES ALLOWED</p>
+      </div>
+
+      <h3 class="passage-title" style="font-size: 1rem; margin-top: 20px;">📖 Glossary Ex 8 - Signs & Notices</h3>
+      <table class="glossary-table">
+        <thead>
+          <tr><th>Từ vựng</th><th>Loại từ</th><th>Nghĩa tiếng Việt</th><th>Cụm từ / Synonym tương đương</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Prohibit</td><td>v</td><td>Cấm, không cho phép</td><td>Forbid = can't bring / not allowed</td></tr>
+          <tr><td>Bring</td><td>v</td><td>Mang theo, đem theo</td><td>Carry = bring food and drink</td></tr>
+          <tr><td>Exit</td><td>n/v</td><td>Lối ra, đi ra ngoài</td><td>Way out = go out this way</td></tr>
+          <tr><td>Leave</td><td>v</td><td>Rời khỏi, đi ra khỏi</td><td>Depart / Vacate = leave this place</td></tr>
+          <tr><td>Turn left</td><td>v phr</td><td>Rẽ sang bên trái</td><td>Change direction to the left</td></tr>
+          <tr><td>Turn right</td><td>v phr</td><td>Rẽ sang bên phải</td><td>Change direction to the right</td></tr>
+          <tr><td>Bicycle</td><td>n</td><td>Xe đạp</td><td>Bike = use your bicycle</td></tr>
+          <tr><td>Prohibition</td><td>n</td><td>Lệnh cấm</td><td>Ban / Restriction = crossed-out sign</td></tr>
+          <tr><td>Notice</td><td>n</td><td>Thông báo, bảng hiệu</td><td>Announcement / Signboard</td></tr>
+          <tr><td>Indicate</td><td>v</td><td>Chỉ ra, biểu thị</td><td>Show / Represent = indicate correct answer</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PASSAGE 2: EXERCISE 8 - TET TRADITIONS -->
+    <div class="passage-content" id="passage2">
+      <h2 class="passage-title">EXERCISE 8: VIETNAMESE TET TRADITIONS</h2>
+      <div class="paragraph-box">
+        <p>Vietnamese has a lot of traditions at Tet. They believe that the first-footer of a family determines their luck for the next year. Usually, people will invite a good-tempered, moral and successful person to visit their houses. During Tet, people visit relatives and friends to exchange best wishes. Children will dress in new clothes. They will receive lucky money for good blessings. Family gathering is really important because it's time family members get together after a long year. At Tet every house is usually decorated by flowers and colored lights.</p>
+        
+        <div>
+          <button class="btn-translate" onclick="toggleTranslation('t_tet')">Mở dịch toàn bài 🌟</button>
+          <div class="translation-text" id="t_tet">
+            Người Việt Nam có rất nhiều truyền thống vào dịp Tết. Họ tin rằng người xông đất cho gia đình sẽ quyết định sự may mắn của họ trong năm tới. Thông thường, mọi người sẽ mời một người tính tình ôn hòa, đạo đức và thành đạt đến xông nhà. Trong dịp Tết, mọi người đi thăm họ hàng, bạn bè để trao cho nhau những lời chúc tốt đẹp nhất. Trẻ em sẽ diện quần áo mới. Các em sẽ nhận được tiền lì xì cho những lời chúc lành. Sự sum họp gia đình thực sự quan trọng vì đó là lúc các thành viên trong gia đình quây quần bên nhau sau một năm dài. Vào dịp Tết, ngôi nhà nào cũng thường được trang trí bằng hoa và đèn màu.
+          </div>
+        </div>
+      </div>
+
+      <h3 class="passage-title" style="font-size: 1rem; margin-top: 20px;">📖 Glossary Ex 8 - Tet Traditions</h3>
+      <table class="glossary-table">
+        <thead>
+          <tr><th>Từ vựng</th><th>Loại từ</th><th>Nghĩa tiếng Việt</th><th>Cụm từ / Synonym tương đương</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Tradition</td><td>n</td><td>Truyền thống, phong tục</td><td>Custom / Heritage</td></tr>
+          <tr><td>First-footer</td><td>n</td><td>Người xông đất đầu năm</td><td>First person entering the house at New Year</td></tr>
+          <tr><td>Determine</td><td>v</td><td>Quyết định, định đoạt</td><td>Decide = determines luck for next year</td></tr>
+          <tr><td>Good-tempered</td><td>adj</td><td>Tính tình hiền lành, ôn hòa</td><td>Good-natured / Gentle</td></tr>
+          <tr><td>Moral</td><td>adj</td><td>Có đạo đức, phẩm hạnh tốt</td><td>Virtuous / Righteous</td></tr>
+          <tr><td>Successful</td><td>adj</td><td>Thành đạt, thành công</td><td>Prosperous = successful person</td></tr>
+          <tr><td>Relative</td><td>n</td><td>Họ hàng, bà con</td><td>Kinsman = visit relatives</td></tr>
+          <tr><td>Exchange</td><td>v</td><td>Trao đổi, gửi cho nhau</td><td>Swap / Trade = exchange best wishes</td></tr>
+          <tr><td>Blessing</td><td>n</td><td>Lời chúc lành, phước lành</td><td>Benediction = lucky money for good blessings</td></tr>
+          <tr><td>Gathering</td><td>n</td><td>Sự sum họp, quây quần</td><td>Reunion / Get-together = Family gathering</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PASSAGE 3: EXERCISE 9 - OAK CITY -->
+    <div class="passage-content" id="passage3">
+      <h2 class="passage-title">EXERCISE 9: OAK CITY</h2>
+      <div class="paragraph-box">
+        <p>Oak City is a great city. There's so <strong>(1)_______</strong> things to do! There are cinemas, parks and discos. It's got some great clothes and music shops <strong>(2)_______</strong>. Oak City is very modern and beautiful. There aren't any <strong>(3)_______</strong> buildings and there's some beautiful <strong>(4)_______</strong> around the city. Is there any pollution in the Oak City? There isn't much pollution <strong>(5)_______</strong> there isn't much traffic. Everyone travels <strong>(6)_______</strong> bike and walks, so there aren't many accidents. No one works, so everyone has got a lot of free time. Are there any unfriendly people in Oak City? No - so come and spend a little time here!</p>
+        
+        <div>
+          <button class="btn-translate" onclick="toggleTranslation('t_oak')">Mở dịch toàn bài 🌟</button>
+          <div class="translation-text" id="t_oak">
+            Thành phố Oak là một thành phố tuyệt vời. Có rất nhiều thứ để làm! Có các rạp chiếu phim, công viên và vũ trường. Nó cũng có một số cửa hàng quần áo và âm nhạc tuyệt vời. Thành phố Oak rất hiện đại và đẹp đẽ. Không có tòa nhà xấu xí nào và có một số phong cảnh đẹp xung quanh thành phố. Có ô nhiễm ở thành phố Oak không? Không có nhiều ô nhiễm vì không có nhiều giao thông. Mọi người đều đi lại bằng xe đạp và đi bộ, vì vậy không có nhiều tai nạn. Không ai phải làm việc, vì vậy mọi người có rất nhiều thời gian rảnh. Có ai không thân thiện ở Thành phố Oak không? Không - vì vậy hãy đến và dành một chút thời gian ở đây!
+          </div>
+        </div>
+      </div>
+
+      <h3 class="passage-title" style="font-size: 1rem; margin-top: 20px;">📖 Glossary Ex 9 - Oak City</h3>
+      <table class="glossary-table">
+        <thead>
+          <tr><th>Từ vựng</th><th>Loại từ</th><th>Nghĩa tiếng Việt</th><th>Cụm từ / Synonym tương đương</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Modern</td><td>adj</td><td>Hiện đại, tân tiến</td><td>Contemporary (Opposite: Ancient)</td></tr>
+          <tr><td>Ugly</td><td>adj</td><td>Xấu xí, không đẹp</td><td>Unattractive (Opposite: Beautiful)</td></tr>
+          <tr><td>Scenery</td><td>n</td><td>Phong cảnh thiên nhiên</td><td>Landscape / View (Uncountable noun)</td></tr>
+          <tr><td>Pollution</td><td>n</td><td>Sự ô nhiễm môi trường</td><td>Contamination = not much pollution</td></tr>
+          <tr><td>Traffic</td><td>n</td><td>Giao thông, xe cộ</td><td>Vehicles on road = not much traffic</td></tr>
+          <tr><td>Accident</td><td>n</td><td>Tai nạn giao thông</td><td>Crash / Collision = not many accidents</td></tr>
+          <tr><td>Unfriendly</td><td>adj</td><td>Không thân thiện</td><td>Hostile / Unwelcoming (Opposite: Friendly)</td></tr>
+          <tr><td>Spend</td><td>v</td><td>Dành thời gian</td><td>Pass time = spend a little time here</td></tr>
+          <tr><td>By bike</td><td>prep phr</td><td>Đi bằng xe đạp</td><td>Cycling = travels by bike</td></tr>
+          <tr><td>Disco</td><td>n</td><td>Vũ trường, câu lạc bộ nhảy</td><td>Nightclub / Dance club</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PASSAGE 4: EXERCISE 10 - SA PA TRIP -->
+    <div class="passage-content" id="passage4">
+      <h2 class="passage-title">EXERCISE 10: VAN'S EMAIL ABOUT SA PA TRIP</h2>
+      <div class="paragraph-box">
+        <p>Dear Thanh,</p>
+        <p>How are you? Last weekend, my family and I went to Sa Pa. It was amazing! The weather was cool and fresh. We visited Fansipan Mountain and saw a lot of beautiful flowers. My dad took many photos. The local food was delicious, especially the grilled corn and sweet potatoes. I also bought some handmade souvenirs for my friends. We stayed at a small hotel near the market. The staff were very friendly, and the room was clean and comfortable. I loved the view from my window; I could see the mountains and the clouds. It was such a wonderful trip!</p>
+        <p>What about you? Have you ever been to Sa Pa? Tell me about your favorite trip in your next e-mail.</p>
+        <p>Love,<br>Van</p>
+        
+        <div>
+          <button class="btn-translate" onclick="toggleTranslation('t_sapa')">Mở dịch toàn bài 🌟</button>
+          <div class="translation-text" id="t_sapa">
+            Thanh thân mến,<br>
+            Cậu khỏe không? Cuối tuần trước, tớ và gia đình đã đi Sa Pa. Chuyến đi thật tuyệt vời! Thời tiết mát mẻ và trong lành. Chúng tớ đã thăm đỉnh núi Fansipan và ngắm rất nhiều loài hoa đẹp. Bố tớ đã chụp rất nhiều ảnh. Món ăn địa phương rất ngon, đặc biệt là ngô nướng và khoai lang nướng. Tớ cũng mua một số quà lưu niệm thủ công cho bạn bè. Chúng tớ ở một khách sạn nhỏ gần chợ. Nhân viên rất thân thiện, còn phòng thì sạch sẽ và thoải mái. Tớ thích tầm nhìn từ cửa sổ phòng mình; tớ có thể nhìn thấy núi và mây. Đó thực sự là một chuyến đi tuyệt vời!<br>
+            Còn cậu thì sao? Cậu đã từng đến Sa Pa chưa? Hãy kể cho tớ nghe về chuyến đi yêu thích của cậu trong email tiếp theo nhé.<br>
+            Yêu thương,<br>
+            Vân
+          </div>
+        </div>
+      </div>
+
+      <h3 class="passage-title" style="font-size: 1rem; margin-top: 20px;">📖 Glossary Ex 10 - Sa Pa Trip</h3>
+      <table class="glossary-table">
+        <thead>
+          <tr><th>Từ vựng</th><th>Loại từ</th><th>Nghĩa tiếng Việt</th><th>Cụm từ / Synonym tương đương</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Amazing</td><td>adj</td><td>Tuyệt vời, kinh ngạc</td><td>Wonderful / Fantastic = amazing trip</td></tr>
+          <tr><td>Fresh</td><td>adj</td><td>Trong lành, tươi mát</td><td>Clean / Pure = fresh weather</td></tr>
+          <tr><td>Grilled</td><td>adj</td><td>Được nướng chín</td><td>Barbecued = grilled corn and sweet potatoes</td></tr>
+          <tr><td>Handmade</td><td>adj</td><td>Làm thủ công bằng tay</td><td>Handcrafted = handmade souvenirs</td></tr>
+          <tr><td>Souvenir</td><td>n</td><td>Quà lưu niệm</td><td>Memento / Keepsake</td></tr>
+          <tr><td>Staff</td><td>n</td><td>Đội ngũ nhân viên</td><td>Employees / Workers = hotel staff</td></tr>
+          <tr><td>Comfortable</td><td>adj</td><td>Thoải mái, dễ chịu</td><td>Cozy / Relaxing = comfortable room</td></tr>
+          <tr><td>Friendly</td><td>adj</td><td>Thân thiện, hiếu khách</td><td>Welcoming (Opposite: Rude)</td></tr>
+          <tr><td>Rude</td><td>adj</td><td>Bất lịch sự, thô lỗ</td><td>Impolite / Unmannerly (Opposite of friendly)</td></tr>
+          <tr><td>View</td><td>n</td><td>Cảnh quan, tầm nhìn</td><td>Scenery / Sight = view from window</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- RIGHT PANE: EXERCISES & QUESTIONS -->
+  <div class="pane" id="rightPane">
+    
+    <!-- EXERCISE 1: SIGNS -->
+    <div class="exercise-content active" id="exercise1">
+      <h2 class="passage-title">✏️ EXERCISE 8: SIGNS & NOTICES</h2>
+      <div id="q_container_ex8_signs"></div>
+    </div>
+
+    <!-- EXERCISE 2: TET TRADITIONS -->
+    <div class="exercise-content" id="exercise2">
+      <h2 class="passage-title">✏️ EXERCISE 8: TET TRADITIONS</h2>
+      <div id="q_container_ex8_tet"></div>
+    </div>
+
+    <!-- EXERCISE 3: OAK CITY -->
+    <div class="exercise-content" id="exercise3">
+      <h2 class="passage-title">✏️ EXERCISE 9: OAK CITY</h2>
+      <div id="q_container_ex9_oak"></div>
+    </div>
+
+    <!-- EXERCISE 4: SA PA TRIP -->
+    <div class="exercise-content" id="exercise4">
+      <h2 class="passage-title">✏️ EXERCISE 10: SA PA TRIP</h2>
+      <div id="q_container_ex10_sapa"></div>
+    </div>
+
+    <div class="submit-container">
+      <button class="btn-submit" onclick="submitExam()">NỘP BÀI TẬP 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Kết quả -->
+<div class="modal-overlay" id="resultModal">
+  <div class="modal-card">
+    <h2 style="font-size: 1.8rem; color: var(--primary-pink-dark); margin-bottom: 10px;">🎉 KẾT QUẢ BÀI THI</h2>
+    <p style="font-size: 1.2rem; font-weight: 800; margin-bottom: 15px;" id="scoreText">Bạn đạt: 0 câu đúng</p>
+    <div id="feedbackText" style="font-size: 0.95rem; color: #4B5563; margin-bottom: 20px; font-weight: 700; line-height: 1.5;"></div>
+    <button class="btn-submit" onclick="closeModal()">ĐÓNG & XEM LẠI</button>
+  </div>
+</div>
+
+<script>
+  const rawQuestionsData = {
+    ex8_signs: [
+      {
+        id: "ex8_s1",
+        question: "1. What does the sign say? (🍔 Biển cấm đồ ăn thức uống)",
+        options: [
+          { text: "A. You can't bring food and drink here.", correct: true },
+          { text: "B. You can eat food and drink here.", correct: false },
+          { text: "C. You can bring food, but not hamburger only.", correct: false },
+          { text: "D. There is no food here.", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi & biển báo: Biển báo có hình ly nước và đồ ăn bị gạch chéo đỏ. Hỏi biển báo này có ý nghĩa gì?",
+          step2: "Phân tích 4 đáp án:<br>A. You can't bring food and drink here (v - Bạn không thể mang đồ ăn và thức uống vào đây).<br>B. You can eat food and drink here (v - Bạn có thể ăn uống ở đây).<br>C. You can bring food, but not hamburger only (v - Bạn có thể mang đồ ăn nhưng không chỉ riêng hamburger).<br>D. There is no food here (v - Không có đồ ăn ở đây).",
+          step3: "Tại sao A đúng? Biển báo gạch chéo hình đồ ăn thức uống biểu thị lệnh cấm mang thực phẩm vào khu vực. Cụm 'can't bring food and drink' phản ánh chính xác hiệu lệnh cấm.",
+          step4: "Tại sao B, C, D sai?<br>- B sai vì cho phép ăn uống, ngược với biển cấm.<br>- C sai vì hiểu lầm hình vẽ mang tính đại diện.<br>- D sai ngữ cảnh vì không phải nói về việc có sẵn đồ ăn hay không."
+        }
+      },
+      {
+        id: "ex8_s2",
+        question: "2. What does the notice say? (🏃 Biển Exit - Lối ra)",
+        options: [
+          { text: "A. You can go out this way.", correct: true },
+          { text: "B. You can not go into this place.", correct: false },
+          { text: "C. You have to leave this place.", correct: false },
+          { text: "D. You can not go out this way.", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi & biển báo: Bảng hiệu ghi từ 'Exit' kèm hình người đang chạy ra ngoài. Hỏi bảng hiệu có ý nghĩa gì?",
+          step2: "Phân tích 4 đáp án:<br>A. You can go out this way (v - Bạn có thể đi ra ngoài theo lối này).<br>B. You can not go into this place (v - Bạn không thể đi vào nơi này).<br>C. You have to leave this place (v - Bạn bắt buộc phải rời khỏi nơi này).<br>D. You can not go out this way (v - Bạn không thể đi ra ngoài theo lối này).",
+          step3: "Tại sao A đúng? Từ 'Exit' nghĩa là lối thoát/lối ra. Biển báo chỉ dẫn cho mọi người biết con đường để đi ra ngoài (go out this way).",
+          step4: "Tại sao B, C, D sai?<br>- B sai vì không phải biển cấm vào.<br>- C sai vì đây là biển chỉ dẫn lối đi chứ không bắt buộc rời đi ngay lập tức.<br>- D sai vì cấm đi ra lối này là ngược nghĩa hoàn toàn."
+        }
+      },
+      {
+        id: "ex8_s3",
+        question: "3. What does the sign say? (↰ Biển cấm rẽ trái)",
+        options: [
+          { text: "A. You can turn left.", correct: false },
+          { text: "B. You can't turn left.", correct: true },
+          { text: "C. You can't turn right.", correct: false },
+          { text: "D. Don't look to the left.", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi & biển báo: Biển báo có mũi tên rẽ trái bị gạch chéo. Hỏi biển báo đưa ra hiệu lệnh gì?",
+          step2: "Phân tích 4 đáp án:<br>A. You can turn left (v - Bạn có thể rẽ trái).<br>B. You can't turn left (v - Bạn không được rẽ trái).<br>C. You can't turn right (v - Bạn không được rẽ phải).<br>D. Don't look to the left (v - Đừng nhìn về bên trái).",
+          step3: "Tại sao B đúng? Biển báo giao thông hình tròn viền đỏ có mũi tên ngoặt trái bị gạch chéo mang nghĩa cấm rẽ trái (You can't turn left).",
+          step4: "Tại sao A, C, D sai?<br>- A sai vì cho phép rẽ trái.<br>- C sai vì nhầm lẫn giữa bên trái và bên phải.<br>- D sai nghĩa của việc nhìn sang trái."
+        }
+      },
+      {
+        id: "ex8_s4",
+        question: "4. What does the sign say? (🚲 Biển cấm xe đạp)",
+        options: [
+          { text: "A. You can use your bicycle here.", correct: false },
+          { text: "B. You can't use bicycles here.", correct: true },
+          { text: "C. There is no bicycle to use.", correct: false },
+          { text: "D. You can't buy any bicycle.", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi & biển báo: Biển báo có hình chiếc xe đạp bị gạch chéo đỏ. Hỏi biển báo có ý nghĩa gì?",
+          step2: "Phân tích 4 đáp án:<br>A. You can use your bicycle here (v - Bạn có thể sử dụng xe đạp ở đây).<br>B. You can't use bicycles here (v - Bạn không được sử dụng xe đạp ở đây).<br>C. There is no bicycle to use (v - Không có xe đạp nào để dùng).<br>D. You can't buy any bicycle (v - Bạn không thể mua bất kỳ chiếc xe đạp nào).",
+          step3: "Tại sao B đúng? Hình vẽ xe đạp gạch chéo là biển báo cấm di chuyển/sử dụng xe đạp trong khu vực (You can't use bicycles here).",
+          step4: "Tại sao A, C, D sai?<br>- A sai vì ngược nghĩa với biển cấm.<br>- C sai vì đây là cấm sử dụng chứ không phải thông báo không có xe.<br>- D sai vì không liên quan đến việc mua bán xe đạp."
+        }
+      }
+    ],
+    ex8_tet: [
+      {
+        id: "ex8_t1",
+        question: "1. _______ determines luck for a new year.",
+        options: [
+          { text: "A. a tradition", correct: false },
+          { text: "B. a first-footer", correct: true },
+          { text: "C. a morality", correct: false },
+          { text: "D. a success", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: _______ quyết định sự may mắn cho một năm mới.",
+          step2: "Phân tích 4 đáp án:<br>A. a tradition (n - một truyền thống).<br>B. a first-footer (n - người xông đất).<br>C. a morality (n - phẩm hạnh đạo đức).<br>D. a success (n - một sự thành công).",
+          step3: "Tại sao B đúng? Dẫn chứng câu 2 bài đọc: 'They believe that the first-footer of a family determines their luck for the next year.'",
+          step4: "Tại sao A, C, D sai? A, C, D không phải là chủ ngữ trực tiếp được nhắc tới quyết định luck cho năm mới."
+        }
+      },
+      {
+        id: "ex8_t2",
+        question: "2. What is the personality of a first footer?",
+        options: [
+          { text: "A. good - tempered", correct: false },
+          { text: "B. moral", correct: false },
+          { text: "C. successful", correct: false },
+          { text: "D. All are correct", correct: true }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: Tính cách/Đặc điểm của một người xông đất thường là gì?",
+          step2: "Phân tích 4 đáp án:<br>A. good-tempered (adj - tính tình ôn hòa).<br>B. moral (adj - đạo đức tốt).<br>C. successful (adj - thành đạt).<br>D. All are correct (Tất cả các ý trên đều đúng).",
+          step3: "Tại sao D đúng? Dẫn chứng câu 3 bài đọc: 'people will invite a good-tempered, moral and successful person to visit their houses.' Cả 3 đặc điểm A, B, C đều được liệt kê.",
+          step4: "Tại sao A, B, C sai? Chọn đơn lẻ A, B hoặc C sẽ bị thiếu sót tính cách còn lại."
+        }
+      },
+      {
+        id: "ex8_t3",
+        question: "3. What does the word 'they' in line 4 refer to?",
+        options: [
+          { text: "A. Children", correct: true },
+          { text: "B. New clothes", correct: false },
+          { text: "C. Family", correct: false },
+          { text: "D. Relatives", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: Từ 'they' ở dòng 4 dùng để thay thế cho danh từ nào đứng trước đó?",
+          step2: "Phân tích 4 đáp án:<br>A. Children (n - Trẻ em).<br>B. New clothes (n - Quần áo mới).<br>C. Family (n - Gia đình).<br>D. Relatives (n - Họ hàng).",
+          step3: "Tại sao A đúng? Đọc câu liền trước: 'Children will dress in new clothes. They will receive lucky money...' Đại từ 'They' thay thế cho danh từ số nhiều 'Children' ngay đằng trước.",
+          step4: "Tại sao B, C, D sai? Clothes (vật) không thể nhận tiền lì xì. Family (danh từ tập hợp số ít) và Relatives ở câu xa hơn."
+        }
+      },
+      {
+        id: "ex8_t4",
+        question: "4. Family gathering is important because _______ .",
+        options: [
+          { text: "A. It's long", correct: false },
+          { text: "B. people can get together", correct: true },
+          { text: "C. family members can celebrate birthday.", correct: false },
+          { text: "D. a long year is important.", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: Việc sum họp gia đình thực sự quan trọng bởi vì _______ .",
+          step2: "Phân tích 4 đáp án:<br>A. It's long (adj - Nó dài).<br>B. people can get together (v - Mọi người có thể quây quần bên nhau).<br>C. family members can celebrate birthday (v - Các thành viên ăn mừng sinh nhật).<br>D. a long year is important (n - Một năm dài là quan trọng).",
+          step3: "Tại sao B đúng? Dẫn chứng bài đọc: 'Family gathering is really important because it's time family members get together after a long year.' (get together = people can get together).",
+          step4: "Tại sao A, C, D sai? C sai vì Tết là dịp quây quần cuối năm chứ không phải tổ chức sinh nhật. A & D giải thích sai nét nghĩa."
+        }
+      },
+      {
+        id: "ex8_t5",
+        question: "5. _______ is used to decorate a house.",
+        options: [
+          { text: "A. bamboo", correct: false },
+          { text: "B. furniture", correct: false },
+          { text: "C. flowers", correct: true },
+          { text: "D. food", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: _______ được sử dụng để trang trí nhà cửa.",
+          step2: "Phân tích 4 đáp án:<br>A. bamboo (n - cây tre).<br>B. furniture (n - đồ nội thất).<br>C. flowers (n - hoa).<br>D. food (n - đồ ăn).",
+          step3: "Tại sao C đúng? Dẫn chứng câu cuối bài đọc: 'At Tet every house is usually decorated by flowers and colored lights.'",
+          step4: "Tại sao A, B, D sai? Bamboo, furniture và food không được bài đọc nhắc tới trong câu miêu tả trang trí nhà cửa."
+        }
+      }
+    ],
+    ex9_oak: [
+      {
+        id: "ex9_1",
+        question: "1. There's so (1) _______ things to do!",
+        options: [
+          { text: "A. much", correct: false },
+          { text: "B. many", correct: true },
+          { text: "C. some", correct: false },
+          { text: "D. any", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: Có quá (1) _______ thứ để làm!",
+          step2: "Phân tích 4 đáp án:<br>A. much (đi với danh từ không đếm được).<br>B. many (đi với danh từ đếm được số nhiều).<br>C. some (một vài).<br>D. any (bất kỳ).",
+          step3: "Tại sao B đúng? Đứng sau chỗ trống là danh từ đếm được số nhiều 'things'. Cấu trúc cảm thán: 'so many + danh từ đếm được số nhiều'.",
+          step4: "Tại sao A, C, D sai? A 'much' chỉ đi với danh từ không đếm được. C & D không tạo thành cấu trúc cảm thán 'so many'."
+        }
+      },
+      {
+        id: "ex9_2",
+        question: "2. It's got some great clothes and music shops (2) _______ .",
+        options: [
+          { text: "A. neither", correct: false },
+          { text: "B. either", correct: false },
+          { text: "C. too", correct: true },
+          { text: "D. so", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: Nó cũng có một số cửa hàng quần áo và âm nhạc tuyệt vời (2) _______ .",
+          step2: "Phân tích 4 đáp án:<br>A. neither (cũng không).<br>B. either (cũng không, dùng cuối câu phủ định).<br>C. too (cũng vậy, dùng cuối câu khẳng định).<br>D. so (cho nên).",
+          step3: "Tại sao C đúng? Từ 'too' đứng ở cuối câu khẳng định mang nghĩa 'cũng vậy / cũng có nữa'.",
+          step4: "Tại sao A, B, D sai? A & B dùng cho câu phủ định. D đứng đầu mệnh đề chỉ kết quả."
+        }
+      },
+      {
+        id: "ex9_3",
+        question: "3. There aren't any (3) _______ buildings...",
+        options: [
+          { text: "A. beautiful", correct: false },
+          { text: "B. ugly", correct: true },
+          { text: "C. pretty", correct: false },
+          { text: "D. unpleasant", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: Không có bất kỳ tòa nhà (3) _______ nào...",
+          step2: "Phân tích 4 đáp án:<br>A. beautiful (adj - đẹp).<br>B. ugly (adj - xấu xí).<br>C. pretty (adj - xinh xắn).<br>D. unpleasant (adj - không dễ chịu).",
+          step3: "Tại sao B đúng? Mối quan hệ khen ngợi cảnh quan: Thành phố đẹp & hiện đại -> Không có tòa nhà xấu xí nào (ugly buildings).",
+          step4: "Tại sao A, C, D sai? A & C mâu thuẫn khi đi cùng vế phủ định 'aren't any'."
+        }
+      },
+      {
+        id: "ex9_4",
+        question: "4. ...there's some beautiful (4) _______ around the city.",
+        options: [
+          { text: "A. scenery", correct: true },
+          { text: "B. scene", correct: false },
+          { text: "C. view", correct: false },
+          { text: "D. sight", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: ...và có một số (4) _______ đẹp xung quanh thành phố.",
+          step2: "Phân tích 4 đáp án:<br>A. scenery (n - phong cảnh, danh từ không đếm được).<br>B. scene (n - danh từ đếm được).<br>C. view (n - danh từ đếm được).<br>D. sight (n - danh từ đếm được).",
+          step3: "Tại sao A đúng? Động từ chia số ít 'there's' (there is) đi với 'some' đòi hỏi danh từ không đếm được 'scenery'.",
+          step4: "Tại sao B, C, D sai? Scene, view, sight là danh từ đếm được số ít, nếu đi với some phải ở dạng số nhiều."
+        }
+      },
+      {
+        id: "ex9_5",
+        question: "5. There isn't much pollution (5) _______ there isn't much traffic.",
+        options: [
+          { text: "A. so", correct: false },
+          { text: "B. because", correct: true },
+          { text: "C. although", correct: false },
+          { text: "D. if", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: Không có nhiều sự ô nhiễm (5) _______ không có nhiều giao thông.",
+          step2: "Phân tích 4 đáp án:<br>A. so (vì vậy).<br>B. because (bởi vì).<br>C. although (mặc dù).<br>D. if (nếu).",
+          step3: "Tại sao B đúng? Vế sau 'không có nhiều xe cộ' giải thích lý do/nguyên nhân cho vế trước 'không ô nhiễm'. Dùng liên từ 'because'.",
+          step4: "Tại sao A, C, D sai? A chỉ kết quả. C chỉ nhượng bộ. D chỉ điều kiện."
+        }
+      },
+      {
+        id: "ex9_6",
+        question: "6. Everyone travels (6) _______ bike and walks...",
+        options: [
+          { text: "A. on", correct: false },
+          { text: "B. in", correct: false },
+          { text: "C. with", correct: false },
+          { text: "D. by", correct: true }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: Mọi người đều di chuyển (6) _______ xe đạp và đi bộ...",
+          step2: "Phân tích 4 đáp án:<br>A. on (trên).<br>B. in (trong).<br>C. with (với).<br>D. by (bằng).",
+          step3: "Tại sao D đúng? Cấu trúc chỉ phương tiện di chuyển tổng quát: 'by + tên phương tiện' (by bike = đi bằng xe đạp).",
+          step4: "Tại sao A, B, C sai? A cần mạo từ (on a bike). B dùng cho ô tô/taxi. C sai ngữ pháp chỉ phương tiện."
+        }
+      }
+    ],
+    ex10_sapa: [
+      {
+        id: "ex10_1",
+        question: "1. Where did Van go last weekend?",
+        options: [
+          { text: "A. Da Nang", correct: false },
+          { text: "B. Ha Long Bay", correct: false },
+          { text: "C. Sa Pa", correct: true },
+          { text: "D. Phu Quoc", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: Vân đã đi đâu vào cuối tuần trước?",
+          step2: "Phân tích 4 đáp án: A. Đà Nẵng; B. Vịnh Hạ Long; C. Sa Pa; D. Phú Quốc.",
+          step3: "Tại sao C đúng? Dẫn chứng dòng 1 email: 'Last weekend, my family and I went to Sa Pa.'",
+          step4: "Tại sao A, B, D sai? Đà Nẵng, Hạ Long, Phú Quốc không xuất hiện trong email."
+        }
+      },
+      {
+        id: "ex10_2",
+        question: "2. What did Van and her family visit in Sa Pa?",
+        options: [
+          { text: "A. Fansipan Mountain", correct: true },
+          { text: "B. The beach", correct: false },
+          { text: "C. A theme park", correct: false },
+          { text: "D. A museum", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: Vân và gia đình đã đến thăm địa điểm nào ở Sa Pa?",
+          step2: "Phân tích 4 đáp án:<br>A. Fansipan Mountain (Đỉnh núi Fansipan).<br>B. The beach (Bãi biển).<br>C. A theme park (Công viên chủ đề).<br>D. A museum (Bảo tàng).",
+          step3: "Tại sao A đúng? Dẫn chứng dòng 2 email: 'We visited Fansipan Mountain and saw a lot of beautiful flowers.'",
+          step4: "Tại sao B, C, D sai? Bãi biển, công viên hay bảo tàng không được nhắc đến."
+        }
+      },
+      {
+        id: "ex10_3",
+        question: "3. What did Van like about the local food?",
+        options: [
+          { text: "A. The fresh fruit", correct: false },
+          { text: "B. The grilled corn and sweet potatoes", correct: true },
+          { text: "C. The seafood", correct: false },
+          { text: "D. The spicy noodles", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: Vân thích món ăn địa phương nào nhất?",
+          step2: "Phân tích 4 đáp án:<br>A. The fresh fruit (Trái cây tươi).<br>B. The grilled corn and sweet potatoes (Ngô nướng và khoai lang nướng).<br>C. The seafood (Hải sản).<br>D. The spicy noodles (Mì cay).",
+          step3: "Tại sao B đúng? Dẫn chứng dòng 3-4 email: 'The local food was delicious, especially the grilled corn and sweet potatoes.'",
+          step4: "Tại sao A, C, D sai? Trái cây tươi, hải sản và mì cay không có trong đoạn văn."
+        }
+      },
+      {
+        id: "ex10_4",
+        question: "4. What does the word 'it' in line 8 refer to?",
+        options: [
+          { text: "A. The hotel", correct: false },
+          { text: "B. The market", correct: false },
+          { text: "C. The trip", correct: true },
+          { text: "D. The view", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: Từ 'it' ở dòng 8 dùng để thay thế cho danh từ nào?",
+          step2: "Phân tích 4 đáp án:<br>A. Khách sạn.<br>B. Chợ.<br>C. Chuyến đi.<br>D. Tầm nhìn.",
+          step3: "Tại sao C đúng? Đọc câu chứa từ 'it': 'It was such a wonderful trip!' Đại từ 'It' cảm thán tổng kết cho toàn bộ chuyến đi Sa Pa (The trip).",
+          step4: "Tại sao A, B, D sai? Khách sạn, chợ hay tầm nhìn chỉ là một chi tiết nhỏ, không dùng 'wonderful trip' ngay sau đó."
+        }
+      },
+      {
+        id: "ex10_5",
+        question: "5. Where did Van stay during her trip?",
+        options: [
+          { text: "A. At a friend's house", correct: false },
+          { text: "B. At a small hotel", correct: true },
+          { text: "C. In a tent", correct: false },
+          { text: "D. At a resort", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: Vân đã ở đâu trong suốt chuyến đi?",
+          step2: "Phân tích 4 đáp án:<br>A. Ở nhà bạn.<br>B. Ở một khách sạn nhỏ.<br>C. Trong lều.<br>D. Ở khu nghỉ dưỡng.",
+          step3: "Tại sao B đúng? Dẫn chứng dòng 5 email: 'We stayed at a small hotel near the market.'",
+          step4: "Tại sao A, C, D sai? Nhà bạn, lều trại hay resort không phải nơi gia đình Vân lưu trú."
+        }
+      },
+      {
+        id: "ex10_6",
+        question: "6. The word 'friendly' in line 6 is OPPOSITE in meaning to _______ .",
+        options: [
+          { text: "A. kind", correct: false },
+          { text: "B. polite", correct: false },
+          { text: "C. rude", correct: true },
+          { text: "D. helpful", correct: false }
+        ],
+        explanation: {
+          step1: "Dịch câu hỏi: Từ 'friendly' (thân thiện) ở dòng 6 TRÁI NGHĨA với từ nào?",
+          step2: "Phân tích 4 đáp án:<br>A. kind (adj - tốt bụng).<br>B. polite (adj - lịch sự).<br>C. rude (adj - thô lỗ, hỗn láo).<br>D. helpful (adj - hay giúp đỡ).",
+          step3: "Tại sao C đúng? Tính từ 'friendly' có nghĩa là thân thiện, cởi mở. Từ trái nghĩa (OPPOSITE) của nó là 'rude' (thô lỗ, cộc lốc).",
+          step4: "Tại sao A, B, D sai? Kind, polite, helpful đều là các tính từ mang nét nghĩa tích cực gần đồng nghĩa với friendly."
+        }
+      }
+    ]
+  };
+
+  function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  let answeredQuestions = new Set();
+  let score = 0;
+  let timeLeft = 1500; 
+  let timerInterval = null;
+  let isRunning = false;
+
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  function playSound(type) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    if (type === 'correct') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.35);
+    } else {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(130.81, audioCtx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.4);
+    }
+  }
+
+  function renderExercise(sectionKey, containerId) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+
+    rawQuestionsData[sectionKey].forEach(q => {
+      const shuffledOpts = shuffleArray(q.options);
+      
+      const card = document.createElement('div');
+      card.className = 'question-card';
+      card.id = `qCard_${q.id}`;
+
+      let optionsHTML = shuffledOpts.map(opt => `
+        <button class="option-btn" onclick="checkAnswer('${q.id}', this, ${opt.correct})">
+          ${opt.text}
+        </button>
+      `).join('');
+
+      card.innerHTML = `
+        <div class="question-text">${q.question}</div>
+        <div class="options-grid" id="opts_${q.id}">
+          ${optionsHTML}
+        </div>
+        <div class="explanation-box" id="exp_${q.id}">
+          <div class="exp-step"><strong>📌 Bước 1: Dịch câu hỏi/đoạn văn:</strong><br>${q.explanation.step1}</div>
+          <div class="exp-step"><strong>📌 Bước 2: Phân tích 4 đáp án:</strong><br>${q.explanation.step2}</div>
+          <div class="exp-step"><strong>📌 Bước 3: Tại sao đáp án đúng lại đúng?</strong><br>${q.explanation.step3}</div>
+          <div class="exp-step"><strong>📌 Bước 4: Tại sao các đáp án còn lại sai?</strong><br>${q.explanation.step4}</div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function checkAnswer(qId, btn, isCorrect) {
+    if (answeredQuestions.has(qId)) return;
+
+    const optsContainer = document.getElementById(`opts_${qId}`);
+    const expBox = document.getElementById(`exp_${qId}`);
+    const allBtns = optsContainer.querySelectorAll('.option-btn');
+
+    allBtns.forEach(b => b.disabled = true);
+
+    if (isCorrect) {
+      btn.classList.add('correct');
+      playSound('correct');
+      confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
+      score++;
+    } else {
+      btn.classList.add('wrong');
+      playSound('wrong');
+      allBtns.forEach(b => {
+        if (b.getAttribute('onclick').includes('true')) {
+          b.classList.add('correct');
+        }
+      });
+    }
+
+    if (expBox) expBox.style.display = 'block';
+    answeredQuestions.add(qId);
+    updateProgress();
+  }
+
+  function switchPassage(num) {
+    document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+      btn.classList.toggle('active', idx + 1 === num);
+    });
+    document.querySelectorAll('.passage-content').forEach((el, idx) => {
+      el.classList.toggle('active', idx + 1 === num);
+    });
+    document.querySelectorAll('.exercise-content').forEach((el, idx) => {
+      el.classList.toggle('active', idx + 1 === num);
+    });
+  }
+
+  function updateTimerDisplay() {
+    const mins = Math.floor(timeLeft / 60);
+    const secs = timeLeft % 60;
+    document.getElementById('timerDisplay').innerText = 
+      `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  function toggleTimer() {
+    const btn = document.getElementById('timerToggleBtn');
+    if (!isRunning) {
+      isRunning = true;
+      btn.innerText = "TẠM DỪNG";
+      timerInterval = setInterval(() => {
+        if (timeLeft > 0) {
+          timeLeft--;
+          updateTimerDisplay();
+        } else {
+          clearInterval(timerInterval);
+          alert("Đã hết thời gian làm bài!");
+        }
+      }, 1000);
+    } else {
+      isRunning = false;
+      btn.innerText = "TIẾP TỤC";
+      clearInterval(timerInterval);
+    }
+  }
+
+  function updateProgress() {
+    let totalQuestions = 0;
+    Object.keys(rawQuestionsData).forEach(k => totalQuestions += rawQuestionsData[k].length);
+    const pct = (answeredQuestions.size / totalQuestions) * 100;
+    document.getElementById('progressBar').style.width = `${pct}%`;
+  }
+
+  function toggleTranslation(id) {
+    const el = document.getElementById(id);
+    el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+  }
+
+  function submitExam() {
+    clearInterval(timerInterval);
+    const modal = document.getElementById('resultModal');
+    const scoreText = document.getElementById('scoreText');
+    const feedbackText = document.getElementById('feedbackText');
+    
+    const totalDone = answeredQuestions.size || 1;
+    const pct = Math.round((score / totalDone) * 100);
+    
+    scoreText.innerText = `Bạn đạt: ${score}/${totalDone} câu đúng (${pct}%)`;
+
+    if (pct < 50) {
+      feedbackText.innerText = "❤️ Ms Lê Hằng: Điểm lần này chưa cao lắm, con cố gắng đọc kỹ phần giải thích siêu chi tiết và làm lại nhé!";
+    } else if (pct <= 80) {
+      feedbackText.innerText = "👏 Ms Lê Hằng: Con đã có tiến bộ rất tốt! Hãy rà soát lại các câu làm sai để đạt điểm tối đa nhé!";
+    } else {
+      feedbackText.innerText = "🌟 Ms Lê Hằng: Xuất sắc! Con làm bài cực kỳ tốt, hãy tiếp tục duy trì phong độ nhé!";
+      confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+    }
+
+    modal.style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById('resultModal').style.display = "none";
+  }
+
+  window.onload = function() {
+    renderExercise('ex8_signs', 'q_container_ex8_signs');
+    renderExercise('ex8_tet', 'q_container_ex8_tet');
+    renderExercise('ex9_oak', 'q_container_ex9_oak');
+    renderExercise('ex10_sapa', 'q_container_ex10_sapa');
+  };
+</script>
+</body>
+</html>
